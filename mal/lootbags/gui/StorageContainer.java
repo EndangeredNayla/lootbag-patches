@@ -9,22 +9,28 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
+import javax.annotation.Nonnull;
+
 public class StorageContainer extends Container{
 
-	TileEntityStorage bench;
-	private boolean flag = false;
-	
-	public StorageContainer(InventoryPlayer player, TileEntityStorage te)
-	{
-		bench = te;
-		
-		//input
-		this.addSlotToContainer(new StorageSlot(te, 1, 26, 16));
-		
-		//output
-		this.addSlotToContainer(new LootbagSlot(te, 0, 135, 16));
-		
-		//main inventory, so 18-44
+    private static final int OUTPUT_SLOT = 0;
+    private static final int INPUT_SLOT = 1;
+
+    TileEntityStorage bench;
+
+    public StorageContainer(InventoryPlayer player, TileEntityStorage te)
+    {
+        bench = te;
+
+        this.addSlotToContainer(new LootbagSlot(te, OUTPUT_SLOT, 135, 16));
+
+        this.addSlotToContainer(new StorageSlot(te, INPUT_SLOT, 26, 16));
+
+        drawPlayerInventory(player);
+    }
+
+    private void drawPlayerInventory(InventoryPlayer player) {
+        //main inventory, so 18-44
         for (int i = 0; i < 3; ++i)
         {
             for (int j = 0; j < 9; ++j)
@@ -38,120 +44,70 @@ public class StorageContainer extends Container{
         {
             this.addSlotToContainer(new Slot(player, i, 8 + i * 18, 123));
         }
-	}
+    }
 
-	@Override
-	public boolean canInteractWith(EntityPlayer playerIn) {
-		return bench.isUsableByPlayer(playerIn);
-	}
+    @Override
+    public boolean canInteractWith(@Nonnull EntityPlayer playerIn) {
+        return bench.isUsableByPlayer(playerIn);
+    }
 
-	@Override
-	public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player)
-    {
-        //stops a dupe issue
-		flag = false;
-
-		//this is to enable the storage to remove bag value when a bag is swapped out (hotkey press)
-        //why is this here and the function isn't redone so it doesn't run twice?
-        //PROTECTED METHODS ~ PROTECTED METHODS EVERYWHERE
-		InventoryPlayer inventoryplayer = player.inventory;
-		if (clickTypeIn == ClickType.SWAP && slotId==1)
-        {
-        Slot slot4 = this.inventorySlots.get(slotId);
-        ItemStack itemstack6 = inventoryplayer.getStackInSlot(dragType);
-        ItemStack itemstack10 = slot4.getStack();
-
-        if (!itemstack6.isEmpty() || !itemstack10.isEmpty())
-        {
-            if (itemstack6.isEmpty()) {
-                if (slot4.canTakeStack(player)) {
-                    //the actual situation where a bag is removed
-                    bench.removeBag();
-/*                    inventoryplayer.setInventorySlotContents(dragType, itemstack10);
-                    slot4.onSwapCraft(itemstack10.getCount());
-                    slot4.putStack(ItemStack.EMPTY);
-                    slot4.onTake(player, itemstack10);*/
-                }
+    @Override
+    @Nonnull
+    public ItemStack slotClick(int slotPos, int pressedKey, @Nonnull ClickType clickTypeIn, @Nonnull EntityPlayer player) {
+        Slot selectedSlot = inventorySlots.get(slotPos);
+        if (clickTypeIn == ClickType.SWAP && slotPos == OUTPUT_SLOT && pressedKey >= 0 && pressedKey < 9) {
+            if (player.inventory.getStackInSlot(pressedKey).isEmpty() && selectedSlot.getHasStack()) {
+                ItemStack lootBagToGive = selectedSlot.getStack();
+                lootBagToGive.setCount(1);
+                player.inventory.setInventorySlotContents(pressedKey, lootBagToGive);
+                bench.decrStorage(lootBagToGive);
+                return lootBagToGive;
             }
         }
+        return super.slotClick(slotPos, pressedKey, clickTypeIn, player);
     }
-        //the actual slotClick function
-        return super.slotClick(slotId, dragType, clickTypeIn, player);
-    }
-	/**
+    /**
      * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
      */
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int slot)
+    @Nonnull
+    public ItemStack transferStackInSlot(@Nonnull EntityPlayer player, int slotPos)
     {
-    	if(flag)
-    		return ItemStack.EMPTY;
-    	flag = true;
-    	
-    	ItemStack var3 = ItemStack.EMPTY;
-        Slot var4 = this.inventorySlots.get(slot);
-
-        if (var4 != null && var4.getHasStack())
-        {
-            ItemStack var5 = var4.getStack();
-            if(var5.getItem() instanceof LootbagItem && var5.getCount()>1)
-                var5.setCount(1);
-            var3 = var5.copy();
-
-            if(slot==0)//input
-            {
-            	if (!this.mergeItemStack(var5, 2, 38, true))
-                {
-                    return ItemStack.EMPTY;
-                }
-
-                var4.onSlotChange(var5, var3);
-
-            }
-            else if(slot==1)
-            {
-            	if (!this.mergeItemStack(var5, 2, 38, true))
-                {
-                    return ItemStack.EMPTY;
-                }
-
-            	bench.decrStorage(var3);
-                var4.onSlotChange(var5, var3);
-            }
-            else
-            {
-            	if (!this.mergeItemStack(var5, 0, 1, true))
-                {
-                    return ItemStack.EMPTY;
-                }
-
-                var4.onSlotChange(var5, var3);
-            }
-            
-            if (var5.getCount() == 0)
-            {
-                var4.putStack(ItemStack.EMPTY);
-            }
-            else
-            {
-                var4.onSlotChanged();
-            }
-
-            if (var5.getCount() == var3.getCount())
-            {
-                return ItemStack.EMPTY;
-            }
-
-            var4.onTake(player, var5);
+        // I have no idea what the return value is supposed to be used for.
+        // Returning EMPTY every time seems to work at least for the basic use case.
+        if (slotPos == INPUT_SLOT) {
+            return ItemStack.EMPTY;
         }
-        
-        return var3;
+
+        Slot clickedSlot = this.inventorySlots.get(slotPos);
+        if (clickedSlot == null || !clickedSlot.getHasStack()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack clickedStack = clickedSlot.getStack();
+        if (!(clickedStack.getItem() instanceof LootbagItem)) {
+            return ItemStack.EMPTY;
+        }
+
+        if (slotPos == OUTPUT_SLOT) {
+            clickedStack.setCount(1);
+            if (mergeItemStack(clickedStack, 2, 38, true)) {
+                clickedStack.setCount(1);
+                bench.decrStorage(clickedStack);
+            }
+            return ItemStack.EMPTY;
+        }
+
+        bench.incrementStorage(clickedStack);
+        clickedSlot.putStack(ItemStack.EMPTY);
+
+        return ItemStack.EMPTY;
     }
 }
 /*******************************************************************************
  * Copyright (c) 2018 Malorolam.
- * 
+ *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the included license.
- * 
+ *
  *********************************************************************************/
