@@ -429,22 +429,30 @@ public class TileEntityStorage extends TileEntity implements IInventory, ISidedI
 
 	@Override
 	public boolean isUsableByPlayer(EntityPlayer player) {
-		return this.world.getTileEntity(this.pos) != this ? false : player.getDistanceSq(this.pos.getX() + 0.5D, this.pos.getY() + 0.5D, this.pos.getZ() + 0.5D) <= 64.0D;
+		if (this.world.getTileEntity(this.pos) != this) {
+			return false;
+		}
+		return player.getDistanceSq(this.pos.getX() + 0.5D, this.pos.getY() + 0.5D, this.pos.getZ() + 0.5D) <= 64.0D;
 	}
 
 	public int getID() {
 		return outputID;
 	}
 
-	public void decrStorage(ItemStack is) {
-		if(is != null && !is.isEmpty() && is.getItem() instanceof LootbagItem)
-		{
-			int value = BagHandler.getBagValue(is.getMetadata())[1];
-			if(stored_value >= value)
-				stored_value -= value;
-			else
-				stored_value = 0;
+	public void decrStorage(ItemStack itemStack) {
+		if (itemStack == null || itemStack.isEmpty() || !(itemStack.getItem() instanceof LootbagItem)) {
+			return; //TODO: err here
 		}
+		int value = BagHandler.getBagValue(itemStack.getMetadata())[1];
+		stored_value = Math.max(0, stored_value - value);
+	}
+
+	public void incrementStorage(ItemStack itemStack) {
+		if (itemStack == null || itemStack.isEmpty() || !(itemStack.getItem() instanceof LootbagItem)) {
+			return; //TODO: err here
+		}
+		int value = BagHandler.getBagValue(itemStack.getMetadata())[1];
+		stored_value += value;
 	}
 }
 /*******************************************************************************
