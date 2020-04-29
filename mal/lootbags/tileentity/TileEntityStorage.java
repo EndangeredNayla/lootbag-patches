@@ -269,14 +269,15 @@ public class TileEntityStorage extends TileEntity implements IInventory, ISidedI
 
 	@Override
 	public ItemStack decrStackSize(int slot, int dec) {
-		if(slot == 0)
+		if(slot == 0) // Output
 		{
-			int value = BagHandler.getBagValue(outputID)[1];
-			if(stored_value >= value)
-			{
-				stored_value -= value;
-				return new ItemStack(LootBags.lootbagItem, 1, outputID);
+			int bagValue = BagHandler.getBagValue(outputID)[1];
+			int bagsToRemove = Math.min(dec, stored_value / bagValue);
+			if (bagsToRemove == 0) {
+				return ItemStack.EMPTY;
 			}
+			stored_value -= bagValue * bagsToRemove;
+			return new ItemStack(LootBags.lootbagItem, bagsToRemove, outputID);
 		}
 		else
 		{
