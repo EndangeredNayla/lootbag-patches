@@ -54,6 +54,9 @@ public class StorageContainer extends Container{
     @Override
     @Nonnull
     public ItemStack slotClick(int slotPos, int pressedKey, @Nonnull ClickType clickTypeIn, @Nonnull EntityPlayer player) {
+        if (slotPos < 0 || slotPos >= inventorySlots.size()) {
+            return super.slotClick(slotPos, pressedKey, clickTypeIn, player);
+        }
         Slot selectedSlot = inventorySlots.get(slotPos);
         if (clickTypeIn == ClickType.SWAP && slotPos == OUTPUT_SLOT && pressedKey >= 0 && pressedKey < 9) {
             if (player.inventory.getStackInSlot(pressedKey).isEmpty() && selectedSlot.getHasStack()) {
