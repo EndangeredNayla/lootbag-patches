@@ -1,0 +1,16 @@
+[
+  {
+    "modid" : "lootbags",
+    "name" : "Loot Bags",
+    "version" : "2.5.8.6",
+    "url" : "",
+    "credits" : "Malorolam",
+    "authors": ["Malorolam", "CrankySupertoon"],
+    "description": "Add loot pouches to entity drops",
+    "logoFile" : "",
+    "updateUrl" : "",
+    "parent" : "",
+    "screenshots": [],
+    "dependencies": ["Forge@[14.23.3.2703]"]
+  }
+]
