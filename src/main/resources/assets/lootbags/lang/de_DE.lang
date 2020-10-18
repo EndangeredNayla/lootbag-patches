@@ -1,6 +1,4 @@
-﻿< de_DE.lang - German localization file for LootBags mod >
-
-name.lootbags_lootbag_Common.name=gewöhnlicher Beutesack
+﻿name.lootbags_lootbag_Common.name=gewöhnlicher Beutesack
 name.lootbags_lootbag_Uncommon.name=ungewöhnlicher Beutesack
 name.lootbags_lootbag_Rare.name=seltener Beutesack
 name.lootbags_lootbag_Epic.name=epischer Beutesack
