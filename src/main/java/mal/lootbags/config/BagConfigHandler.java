@@ -1297,7 +1297,7 @@ public class BagConfigHandler {
 		//version info
 		list.add("$CONFIGVERSION:"+ LootBags.CONFIGVERSION);
 		//common bag
-		list.add("$STARTBAG:lootbag_Common:0");
+		list.add("$STARTBAG:lootbag_common:0");
 		list.add(ConfigText.TAB.getText()+"$ISSECRET:false");
 		list.add(ConfigText.TAB.getText()+"$BAGTEXTCOLOR:$WHITE");
 		list.add(ConfigText.TAB.getText()+"$BAGTEXTUNOPENED:$AQUA:Ooh, what could be inside?");
@@ -1318,7 +1318,7 @@ public class BagConfigHandler {
 		list.add(ConfigText.TAB.getText()+"$STARTBLACKLIST");
 		list.add(ConfigText.TAB.getText()+ConfigText.TAB.getText()+"lootbags:itemlootbag:0");
 		list.add(ConfigText.TAB.getText()+"$ENDBLACKLIST");
-		list.add("$ENDBAG:lootbag_Common");
+		list.add("$ENDBAG:lootbag_common");
 		
 		//uncommon bag
 		list.add("$STARTBAG:lootbag_Uncommon:1");
