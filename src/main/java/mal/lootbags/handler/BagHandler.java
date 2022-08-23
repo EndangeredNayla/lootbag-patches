@@ -122,7 +122,10 @@ public class BagHandler {
 	{
 		if(isIDFree(ID))
 			return true;
-		return bagList.get(ID).isBagEmpty();
+		Bag bag = bagList.get(ID);
+		if(bag == null)
+			return true;
+		return bag.isBagEmpty();
 	}
 	
 	public static ArrayList<Bag> getBagListRandomized()
